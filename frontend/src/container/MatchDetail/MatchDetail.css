@@ -1,0 +1,26 @@
+.main-area {
+    flex: 1;
+    background: green;
+}
+
+.detail-area {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 10% 20% auto 20%;
+    background-color: darkgray;
+    font-size: 20px;
+    border: 2px solid gray;
+    padding: 15px;
+}
+
+.match-detail {
+    margin: 20px 0;
+    font-size: 30px;
+}
+
+.detail-caption {
+    font-size: 20px;
+    margin: 20px 0 10px;
+}
