@@ -14,10 +14,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, re_path
+from django.urls import path, include
 from django.views.generic import TemplateView
+from rest_framework_simplejwt import views as jwt_views
+from reversiapi.views import ResultListView, LoginApiView, RegisterApiView
 
 urlpatterns = [
+    path('', TemplateView.as_view(template_name="index.html")),
     path('admin/', admin.site.urls),
-    re_path('.*', TemplateView.as_view(template_name='index.html')),
+    path('api/results', ResultListView.as_view()),
+    path('api/user/login', LoginApiView.as_view()),
+    path('api/user/register', RegisterApiView.as_view()),
 ]

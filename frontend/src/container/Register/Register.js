@@ -51,7 +51,7 @@ class Register extends React.Component {
     e.preventDefault();
 
     const user = {
-      name: this.state.name,
+      username: this.state.name,
       email: this.state.email,
       password: this.state.password,
       password_confirm: this.state.password_confirm,

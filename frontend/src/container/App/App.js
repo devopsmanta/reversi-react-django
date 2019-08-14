@@ -24,7 +24,7 @@ import './App.css';
 class App extends React.Component {
 
   componentWillMount() {
-    setBaseURL('http://localhost:5000/api');
+    setBaseURL('http://localhost:8000/api');
     if (localStorage.jwtToken) {
       setAuthToken(localStorage.jwtToken);
       const currentTime = Date.now() / 1000;
