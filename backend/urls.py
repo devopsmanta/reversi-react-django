@@ -16,13 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import TemplateView
-from rest_framework_simplejwt import views as jwt_views
-from reversiapi.views import ResultListView, LoginApiView, RegisterApiView
+from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name="index.html")),
     path('admin/', admin.site.urls),
-    path('api/results', ResultListView.as_view()),
-    path('api/user/login', LoginApiView.as_view()),
-    path('api/user/register', RegisterApiView.as_view()),
+    path('api/', include('reversiapi.urls')),
 ]
+
+urlpatterns = format_suffix_patterns(urlpatterns)

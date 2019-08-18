@@ -41,7 +41,7 @@ class PlayGame extends React.Component {
         isGameOver: true,
       });
 
-      const finalTime = moment(Date()).format('YYYY.M.D HH:mm:ss');
+      const finalTime = moment(Date()).format('YYYY-M-D HH:mm:ss');
       this.props.addResult(props.nBlack, props.nWhite, finalTime);
       this.props.postResult(
         api.result.postResult({
