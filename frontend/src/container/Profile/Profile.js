@@ -40,7 +40,7 @@ class Profile extends React.Component {
     e.preventDefault();
 
     const user = {
-      name: this.state.name,
+      username: this.state.name,
       email: this.state.email,
     };
 

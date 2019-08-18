@@ -74,6 +74,6 @@ class MyUser(AbstractBaseUser):
 
 class Result(models.Model):
     user = models.ForeignKey(MyUser, on_delete=models.CASCADE)
-    black = models.IntegerField()
-    white = models.IntegerField()
-    final_time = models.DateTimeField()
+    nBlack = models.IntegerField()
+    nWhite = models.IntegerField()
+    finalTime = models.DateTimeField()
