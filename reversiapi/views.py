@@ -2,15 +2,8 @@ from rest_framework import generics
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
-from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import ResultSerializer, LoginSerializer, RegisterSerializer, ProfileSerializer, ModifySerializer
-
-
-def get_token(request):
-    token = request.META.get('HTTP_AUTHORIZATION', " ").split(' ')[0]
-    data = {'token': token}
-    return data
+from .serializers import ResultSerializer, LoginSerializer, UserSerializer
 
 
 class LoginApiView(generics.GenericAPIView):
@@ -24,68 +17,44 @@ class LoginApiView(generics.GenericAPIView):
             return Response({
                 "message": e.detail['message'][0]
             }, status.HTTP_400_BAD_REQUEST)
-        user = serializer.validated_data
-        refresh = RefreshToken.for_user(user)
-
-        return Response({
-            "token": str(refresh.access_token),
-        })
+        return Response(serializer.validated_data)
 
 
 class RegisterApiView(generics.GenericAPIView):
-    serializer_class = RegisterSerializer
+    serializer_class = UserSerializer
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        refresh = RefreshToken.for_user(user)
 
         return Response({
-            "token": str(refresh.access_token),
+            "token": user.token,
         })
 
 
 class ProfileApiView(generics.GenericAPIView):
-    serializer_class = ProfileSerializer
+    serializer_class = UserSerializer
 
     def get(self, request):
-        token = get_token(request)
-        serializer = self.get_serializer(data=token)
-        serializer.is_valid(raise_exception=False)
-        user = serializer.validated_data
-
-        return Response({'email': user.email, 'name': user.username})
-
-
-class ModifyApiView(generics.GenericAPIView):
-    serializer_class = ModifySerializer
+        return Response({'email': request.user.email, 'name': request.user.username})
 
     def post(self, request):
-        token = get_token(request)
-        profile_serializer = ProfileSerializer(data=token)
-        profile_serializer.is_valid(raise_exception=True)
-        user = profile_serializer.validated_data
-
-        serializer = self.get_serializer(user, data=request.data)
+        serializer = self.get_serializer(request.user, data=request.data)
         try:
             serializer.is_valid(raise_exception=True)
             serializer.save()
         except Exception as e:
             print(e)
 
-        return Response({'email': user.email, 'name': user.username})
+        return Response({'email': request.user.email, 'name': request.user.username})
 
 
 class ResultApiView(generics.GenericAPIView):
     serializer_class = ResultSerializer
 
     def get(self, request):
-        token = get_token(request)
-        profile_serializer = ProfileSerializer(data=token)
-        profile_serializer.is_valid(raise_exception=True)
-        user = profile_serializer.validated_data
-        serializer = self.get_serializer(data=user.result_set.all(), many=True)
+        serializer = self.get_serializer(data=request.user.result_set.all(), many=True)
         try:
             serializer.is_valid(raise_exception=True)
         except Exception as e:
@@ -94,14 +63,10 @@ class ResultApiView(generics.GenericAPIView):
         return Response(serializer.data)
 
     def post(self, request):
-        token = get_token(request)
-        profile_serializer = ProfileSerializer(data=token)
-        profile_serializer.is_valid(raise_exception=True)
-        user = profile_serializer.validated_data
         serializer = self.get_serializer(data=request.data)
         try:
             serializer.is_valid(raise_exception=True)
         except Exception as e:
             print(e)
-        user.result_set.create(**serializer.validated_data)
+        request.user.result_set.create(**serializer.validated_data)
         return Response()

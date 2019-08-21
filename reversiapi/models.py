@@ -2,6 +2,7 @@ from django.contrib.auth.models import (
     BaseUserManager, AbstractBaseUser
 )
 from django.db import models
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class MyUserManager(BaseUserManager):
@@ -55,7 +56,7 @@ class MyUser(AbstractBaseUser):
     def __str__(self):
         return self.email
 
-    def has_perm(self, perm, obj=None):
+    def has_perm(perm, obj=None):
         "Does the user have a specific permission?"
         # Simplest possible answer: Yes, always
         return True
@@ -70,6 +71,12 @@ class MyUser(AbstractBaseUser):
         "Is the user a member of staff?"
         # Simplest possible answer: All admins are staff
         return self.is_admin
+
+    @property
+    def token(self):
+        refresh = RefreshToken.for_user(self)
+
+        return str(refresh.access_token)
 
 
 class Result(models.Model):
