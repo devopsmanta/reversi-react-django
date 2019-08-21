@@ -1,7 +1,6 @@
-from jwt import decode as jwt_decode
+from django.contrib.auth import authenticate
 from rest_framework import serializers
 
-from backend import settings
 from .models import Result, MyUser
 
 
@@ -17,47 +16,44 @@ class LoginSerializer(serializers.Serializer):
 
     def validate(self, data):
         email = data.get('email', None)
-        password = data['password']
-        if not email:
-            raise serializers.ValidationError(detail={'message': 'Email is required'})
-        try:
-            user = MyUser.objects.get(email=email)
-        except MyUser.DoesNotExist:
-            raise serializers.ValidationError(detail={'message': 'User not found'})
-        if not user.check_password(password):
-            raise serializers.ValidationError(detail={'message': 'Incorrect credentials'})
-        if user.is_active:
-            return user
-        raise serializers.ValidationError(detail={'message': 'User is not active'})
+        password = data.get('password', None)
+
+        if email is None:
+            raise serializers.ValidationError(
+                detail={'message': 'An email address is required to log in.'}
+            )
+
+        if password is None:
+            raise serializers.ValidationError(
+                detail={'message': 'A password is required to log in.'}
+            )
+
+        user = authenticate(username=email, password=password)
+
+        if user is None:
+            raise serializers.ValidationError({
+                'message': 'A user with this email and password was not found.'
+            })
+
+        if not user.is_active:
+            raise serializers.ValidationError(detail={'message': 'User is not active'})
+
+        return {
+            'token': user.token
+        }
 
 
-class RegisterSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = MyUser
         fields = ('username', 'email', 'password')
-        extra_kwargs = {'password': {'write_only': True}}
+        extra_kwargs = {'password': {'write_only': True, 'required': False}}
 
     def create(self, validated_data):
         user = MyUser.objects.create_user(validated_data['email'], validated_data['username'],
                                           validated_data['password'])
 
         return user
-
-
-class ProfileSerializer(serializers.Serializer):
-    token = serializers.CharField()
-
-    def validate(self, data):
-        user_data = jwt_decode(data['token'], settings.SECRET_KEY, algorithms=['HS256'])
-        user = MyUser.objects.get(id=user_data['user_id'])
-
-        return user
-
-
-class ModifySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MyUser
-        fields = ['email', 'username']
 
     def update(self, instance, validated_data):
         instance.email = validated_data.get('email', instance.email)
