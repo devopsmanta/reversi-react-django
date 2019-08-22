@@ -4,12 +4,6 @@ from rest_framework import serializers
 from .models import Result, MyUser
 
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MyUser
-        fields = ('email', 'username')
-
-
 class LoginSerializer(serializers.Serializer):
     email = serializers.CharField()
     password = serializers.CharField()
@@ -31,7 +25,7 @@ class LoginSerializer(serializers.Serializer):
         user = authenticate(username=email, password=password)
 
         if user is None:
-            raise serializers.ValidationError({
+            raise serializers.ValidationError(detail={
                 'message': 'A user with this email and password was not found.'
             })
 
